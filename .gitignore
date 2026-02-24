@@ -1,0 +1,12 @@
+# Obsidian internal files
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/graph.json
+.obsidian/appearance.json
+
+# Plugin specific logs/configs
+.obsidian/plugins/obsidian-git/data.json
+
+# OS specific files
+.DS_Store
+Thumbs.db
