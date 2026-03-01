@@ -17,107 +17,7 @@
 | **头/中删除**  | $O(N)$      | **$O(1)$***      | *同上，解开绳子即可。                                                      |
 | **尾部追加**   | $O(1)$ (均摊) | $O(N)$           | 因为我们需要从头一直遍历到尾巴，才能把新节点挂上去。（除非我们额外维护一个尾指针 tail，但这次实战暂不引入，逼你练习遍历）。 |
 
----
-
-### 第二部分：C++ 新手启动包（代码骨架）
-
-下面是符合现代 C++ 规范的骨架代码。请把它复制到你的 IDE 中。我已经帮你写好了 `Node` 结构体、初始化操作和遍历打印的代码。
-
-仔细阅读 `printList` 函数，体会一下什么叫 **“顺藤摸瓜（`curr = curr->next`）”**。
-
-```cpp
-#include <iostream>
-
-// 定义节点结构体
-struct Node {
-    int data;       // 数据域
-    Node* next;     // 指针域
-
-    // 构造函数：利用初始化列表，方便我们 new 节点时直接赋初值
-    Node(int val) : data(val), next(nullptr) {}
-};
-
-class LinkedList {
-private:
-    Node* head;     // 核心骨架：链表的头指针。只要抓住了头，就能揪出整串链表
-
-public:
-    // 构造函数：初始化为空链表
-    LinkedList() {
-        head = nullptr; 
-    }
-
-    // [已实现] 打印链表（遍历操作的黄金模板）
-    void printList() {
-        Node* curr = head; // 永远不要拿 head 直接去遍历，找个替身 curr
-        std::cout << "链表内容: ";
-        while (curr != nullptr) {
-            std::cout << curr->data << " -> ";
-            curr = curr->next; // 顺藤摸瓜，走向下一个节点
-        }
-        std::cout << "nullptr" << std::endl;
-    }
-
-    // ================== 下面是你需要挑战的任务 ==================
-
-    // 挑战 1.1：在链表尾部追加新元素
-    void append(int val) {
-        // TODO: 
-        // 1. new 一个新的 Node
-        // 2. 如果链表为空（head == nullptr），直接让 head 指向新节点
-        // 3. 如果不为空，找个替身 curr 一直遍历到尾巴（curr->next == nullptr）
-        // 4. 把新节点挂在尾巴上
-    }
-
-    // 挑战 1.2：在指定的索引处插入新元素 (索引从 0 开始)
-    // 提示：要想在 index 处插入，必须找到 index - 1 处的节点
-    bool insert(int index, int val) {
-        // TODO:
-        // 1. 如果 index == 0 怎么办？（需要修改 head）
-        // 2. 如果 index > 0，找到第 index - 1 个节点。
-        // 3. 关键动作（务必画图）：新节点的 next 指向谁？前一个节点的 next 指向谁？顺序极其重要！
-        // 4. 越界检查。如果还没到 index 链表就到底了，插入失败返回 false。
-        return false;
-    }
-};
-
-int main() {
-    LinkedList list;
-    
-    // 测试追加
-    // list.append(10);
-    // list.append(20);
-    // list.append(30);
-    // list.printList(); // 期望输出: 10 -> 20 -> 30 -> nullptr
-
-    // 测试插入
-    // list.insert(1, 15);
-    // list.printList(); // 期望输出: 10 -> 15 -> 20 -> 30 -> nullptr
-    // list.insert(0, 5);
-    // list.printList(); // 期望输出: 5 -> 10 -> 15 -> 20 -> 30 -> nullptr
-
-    return 0;
-}
-```
-#### 注意一下析构的时候
-```cpp
-~Linklist()
-{
-Node *curr = head;
-while (curr != nullptr)
-{
-Node *nextNode = curr->next; // 1. 记下明天的路
-delete curr; // 2. 炸掉今天的桥
-curr = nextNode; // 3. 走向明天
-}
-}
-//这里需要注意的地方是delete curr后不能再通过curr访问内容了，这个指针已经不能用了
-```
----
-
-### 第三部分：实战过关挑战（由简到难）
-
-请你打开画图工具，或者拿起纸笔，完成以下挑战。完成一个就可以发给我做 Code Review，不要急于一口气全写完。
+### 第二部分：实战过关挑战（由简到难）
 
 *   📌 **基础过关（当前任务）：** 完成骨架代码中的 `append(int val)` 和 `insert(int index, int val)`。
     *   **防坑指南：** 插入操作时，**绝对不能先断开前面的线！** 一旦前驱节点丢失了原本后面的指针，后面的整串链表就成了太空垃圾（内存泄漏），你也再也找不到它们了。
@@ -130,8 +30,93 @@ curr = nextNode; // 3. 走向明天
 *   📌 **进阶挑战（预告 / LeetCode 206 题）：** 实现 `void reverse()` 单链表原地逆置。
     *   **难点：** 不允许申请新的节点，纯靠修改指针把 `1->2->3` 变成 `3->2->1`。
 
----
+```cpp
+Node *ReverseList()
 
+{
+
+// 1. 全局守卫
+
+if (head == nullptr)
+
+{
+
+std::cout << "Empty list, Reversion failed.\n";
+
+return nullptr;
+
+}
+
+  
+
+// 2. 严格初始化 3 个指针！不准少一个！
+
+Node *prev = nullptr; // 代表“昨天”。初始时 1 的前面是虚空，所以是 nullptr
+
+Node *curr = head; // 代表“今天”。从头节点开始
+
+Node *nextTemp = nullptr; // 代表“明天”。先空着
+
+  
+
+// 3. 只要“今天”还没走到世界尽头
+
+while (curr != nullptr)
+
+{
+
+  
+
+// 【第一步】记下明天的路。
+
+// 因为等会要把 curr 的箭头往回掰，不记下来，明天就找不到了！
+
+nextTemp = curr->next;
+
+  
+
+// 【第二步】转身，牵住昨天的人（物理反转箭头）。
+
+// 把 curr 的 next 指向 prev。
+
+curr->next = prev;
+
+  
+
+// 【第三步】昨天的人走到今天。
+
+// prev 往前走一步，来到 curr 的位置。
+
+prev = curr;
+
+  
+
+// 【第四步】今天的人走向明天。
+
+// curr 往前走一步，来到刚才记下的 nextTemp 的位置。
+
+curr = nextTemp;
+
+}
+
+  
+
+// 4. 循环结束时，curr 掉下悬崖变成了 nullptr。
+
+// 此时 prev 刚好停在原链表的最后一个节点！
+
+// 把它设为新的头节点！
+
+head = prev;
+
+  
+
+return head;
+
+}
+```
+
+---
 
 # 虚拟头节点
 
