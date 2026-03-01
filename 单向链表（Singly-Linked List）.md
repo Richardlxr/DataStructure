@@ -31,92 +31,45 @@
     *   **难点：** 不允许申请新的节点，纯靠修改指针把 `1->2->3` 变成 `3->2->1`。
 
 ```cpp
-Node *ReverseList()
 
+Node* ReverseList()
 {
-
 // 1. 全局守卫
-
 if (head == nullptr)
-
 {
-
 std::cout << "Empty list, Reversion failed.\n";
-
 return nullptr;
-
 }
-
-  
-
 // 2. 严格初始化 3 个指针！不准少一个！
-
 Node *prev = nullptr; // 代表“昨天”。初始时 1 的前面是虚空，所以是 nullptr
-
 Node *curr = head; // 代表“今天”。从头节点开始
-
 Node *nextTemp = nullptr; // 代表“明天”。先空着
-
-  
-
 // 3. 只要“今天”还没走到世界尽头
-
 while (curr != nullptr)
-
 {
-
-  
-
 // 【第一步】记下明天的路。
-
 // 因为等会要把 curr 的箭头往回掰，不记下来，明天就找不到了！
-
 nextTemp = curr->next;
-
-  
-
 // 【第二步】转身，牵住昨天的人（物理反转箭头）。
-
 // 把 curr 的 next 指向 prev。
-
 curr->next = prev;
-
-  
-
 // 【第三步】昨天的人走到今天。
-
 // prev 往前走一步，来到 curr 的位置。
-
 prev = curr;
-
-  
-
 // 【第四步】今天的人走向明天。
-
 // curr 往前走一步，来到刚才记下的 nextTemp 的位置。
-
 curr = nextTemp;
-
 }
-
-  
-
 // 4. 循环结束时，curr 掉下悬崖变成了 nullptr。
-
 // 此时 prev 刚好停在原链表的最后一个节点！
-
 // 把它设为新的头节点！
-
 head = prev;
-
-  
-
 return head;
-
 }
+
 ```
 
----
+
 
 # 虚拟头节点
 
