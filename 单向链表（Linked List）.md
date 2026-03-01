@@ -99,7 +99,20 @@ int main() {
     return 0;
 }
 ```
-
+#### 注意一下析构的时候
+```cpp
+~Linklist()
+{
+Node *curr = head;
+while (curr != nullptr)
+{
+Node *nextNode = curr->next; // 1. 记下明天的路
+delete curr; // 2. 炸掉今天的桥
+curr = nextNode; // 3. 走向明天
+}
+}
+//这里需要注意的地方是delete curr后不能再通过curr访问内容了，这个指针已经不能用了
+```
 ---
 
 ### 第三部分：实战过关挑战（由简到难）
