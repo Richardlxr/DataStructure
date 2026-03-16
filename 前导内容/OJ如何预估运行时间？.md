@@ -1,32 +1,3 @@
-`dummyhead = new Node(T{}); // 学习一下初始化`
-
-```
- void insert(T var, int index) {
-        if (index < 0 || index > size) {
-            throw std::out_of_range("Invalid Index!");
-        }
-        Node* p = new Node(var);
-        Node* a = dummyhead;
-        for (int i = 0; i < index; i++) {
-            a = a->next;
-        }
-        p->next = a->next;
-        a->next = p;
-        if (index == size) {
-            tail = p;
-        }
-        size++;
-    }
-    void push_to_tail(T var) {
-        Node* p    = new Node(var);
-        tail->next = p;
-        tail       = p;
-        size++;
-    }
-```
-
-**通过维护tail来减少尾插的时间复杂度（不会TLE）**
-如何预估运行时间？
 
 一个经验公式：**现代 OJ 每秒大约能跑 10⁸ 次简单操作**。
 
@@ -40,7 +11,7 @@
 估算方法就是把**复杂度代入 n，除以 10⁸**，单位秒：
 
 ```/dev/null/estimate.txt#L1-4
-O(n²)，n = 10⁵：
+O(n²)，n = 10⁵（规模）：
   (10⁵)² / 10⁸ = 10¹⁰ / 10⁸ = 100 秒 → 必然 TLE
 
 O(n)，n = 10⁵：
