@@ -1,0 +1,106 @@
+在C++中，虽然语法上你可以 `throw` 任何东西（比如一个 `int` 错误码、一个 `bool`，甚至一个原生字符串 `"Error"`），但在==**实际工程开发中，我们几乎只 throw 继承自 `std::exception` 的类对象**。==
+
+这样做的好处是统一接口：所有的异常都可以通过 `catch(const std::exception& e)` 来捕获，并通过 `e.what()` 打印出具体的错误信息。
+
+在实战中，我们通常 `throw` 以下两大类东西：
+
+## 1. 标准库提供的现成异常（`<stdexcept>`）
+
+C++ 标准库为你准备好了一系列分类明确的异常类。当你的代码遇到常规错误时，优先抛出这些：
+
+- **`std::invalid_argument`（无效参数）**
+- 场景：调用函数时传进来的参数不合法。
+- 示例：
+
+```cpp
+void setAge(int age) {
+    if (age < 0 || age > 150) {
+        throw std::invalid_argument("Age must be between 0 and 150");
+    }
+}
+```
+
+- **`std::out_of_range`（越界）**
+- 场景：访问数组、`vector` 或其他容器时索引超出了范围。
+- 示例：标准库的 `std::vector::at()` 就是抛出这个异常。如果你自己写一个容器类，越界时也应该抛出这个。
+
+- **`std::runtime_error`（运行时错误）**
+- 场景：只有在程序运行起来后才能探测到的错误，且超出了程序的控制范围（比如：文件找不到、网络断开、硬件设备初始化失败）。
+- 示例：
+
+```cpp
+void openFile(const std::string& path) {
+    if (!fileExists(path)) {
+        throw std::runtime_error("Cannot open file: " + path);
+    }
+}
+```
+
+- **`std::logic_error`（逻辑错误）**
+- 场景：代码内部的逻辑 bug，通常代表“前置条件未满足”。比如违反了数学规则、或者在对象尚未初始化时就调用了它的方法。
+- 示例：
+
+```cpp
+void calculate() {
+    if (!isInitialized) {
+        throw std::logic_error("Calculator must be initialized before use");
+    }
+}
+```
+
+---
+
+## 2. 自定义异常（企业级开发最常见）
+
+在稍微大一点的项目中，标准库的异常往往不够用。因为 `e.what()` 只能返回一个字符串，而我们在实际业务中，往往需要传递**错误码（Error Code）**、**发生错误的文件名/行号**，或者**特定的业务状态**。
+
+这时候我们会自己写一个类，**继承自 `std::runtime_error` 或 `std::exception`**，然后 `throw` 我们的自定义对象。
+
+```cpp
+#include <stdexcept>
+#include <string>
+
+// 自定义一个网络异常类
+class NetworkException : public std::runtime_error {
+private:
+    int m_errorCode; // 保存 HTTP 状态码或自定义网络错误码
+
+public:
+    // 构造函数：接收错误信息和错误码
+    NetworkException(const std::string& message, int errorCode) 
+        : std::runtime_error(message), m_errorCode(errorCode) {}
+
+    // 获取错误码的接口
+    int getErrorCode() const { 
+        return m_errorCode; 
+    }
+};
+
+// --- 在业务代码中抛出 ---
+void sendData(const std::string& data) {
+    int status = performNetworkCall(data);
+    if (status == 404) {
+        // 抛出时携带具体的错误信息和错误码
+        throw NetworkException("API endpoint not found", 404);
+    } else if (status == 500) {
+        throw NetworkException("Internal server error", 500);
+    }
+}
+```
+
+---
+
+## 🚨 实战避坑：绝对不要 `throw` 以下内容
+
+1. **不要 `throw int` 或枚举：**
+- 错误示范：`throw -1;` 或 `throw 404;`
+- 原因：捕获者很难仅凭一个数字知道发生了什么，且缺乏统一的 `catch` 接口。
+
+2. **不要 `throw` 原生字符串：**
+- 错误示范：`throw "File not found";`
+- 原因：这抛出的类型是 `const char*`。它不会被 `catch(const std::exception& e)` 捕获到，非常容易导致程序漏抓异常而崩溃。如果要抛出字符串，请用 `throw std::runtime_error("...")` 包装起来。
+
+3. **不要 `throw` 局部指针：**
+- 错误示范：`throw &myException;`
+- 原因：栈展开时局部变量会被销毁，捕获方拿到的是一个野指针（悬空指针）。
+- ==按值抛出，按常引用捕获==
