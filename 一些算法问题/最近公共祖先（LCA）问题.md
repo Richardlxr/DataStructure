@@ -128,5 +128,101 @@ int getLCA(int u, int v) {
 }
 ```
 
----
+```c
+#include <iostream>
 
+#include <vector>
+
+#include <algorithm>
+
+using namespace std;
+
+const int MAXN = 100005;
+const int LOGN = 18; // 2^18 > 100000，足够了
+
+struct Node {
+    int l, r;
+}
+tree[MAXN];
+
+int fa[MAXN][LOGN + 1]; // fa[i][j] 表示节点 i 往上跳 2^j 步到达的祖先
+int depth[MAXN];
+bool has_parent[MAXN];
+
+// 使用 DFS 预处理深度和倍增表
+// u: 当前节点, p: 父亲节点, d: 当前深度
+void dfs(int u, int p, int d) {
+    if (u == 0) return;
+
+    depth[u] = d;
+    fa[u][0] = p; // 2^0 = 1 步就是爸爸
+
+    // 重点：填写魔法字典（倍增表）
+    // 我跳 2^i 步 = 先跳 2^{i-1} 步，再跳 2^{i-1} 步
+    for (int i = 1; i <= LOGN; i++) {
+        fa[u][i] = fa[fa[u][i - 1]][i - 1];
+    }
+
+    dfs(tree[u].l, u, d + 1);
+    dfs(tree[u].r, u, d + 1);
+}
+
+int getLCA(int u, int v) {
+    // 1. 确保 u 是更深的那个
+    if (depth[u] < depth[v]) swap(u, v);
+
+    // 2. 让 u 向上跳，跳到和 v 同一高度
+    // 利用二进制思想：比如差 13 层 (1101)，就跳 8+4+1 层
+    for (int i = LOGN; i >= 0; i--) {
+        if (depth[fa[u][i]] >= depth[v]) {
+            u = fa[u][i];
+        }
+    }
+
+    // 如果跳到同一高度后重合了，说明 v 就是 LCA
+    if (u == v) return u;
+
+    // 3. u 和 v 一起向上跳
+    // 同样从大步往小步跳
+    for (int i = LOGN; i >= 0; i--) {
+        if (fa[u][i] != fa[v][i]) { // 如果跳完还不相等，说明还没到 LCA，可以跳
+            u = fa[u][i];
+            v = fa[v][i];
+        }
+    }
+
+    // 最后停留的位置是 LCA 的直接子节点，再往上一跳就是答案
+    return fa[u][0];
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, x, y;
+    if (!(cin >> n >> x >> y)) return 0;
+
+    for (int i = 1; i <= n; i++) {
+        cin >> tree[i].l >> tree[i].r;
+        if (tree[i].l != 0) has_parent[tree[i].l] = true;
+        if (tree[i].r != 0) has_parent[tree[i].r] = true;
+    }
+
+    // 寻找根节点
+    int root = 1;
+    for (int i = 1; i <= n; i++) {
+        if (!has_parent[i]) {
+            root = i;
+            break;
+        }
+    }
+
+    // 预处理
+    dfs(root, 0, 1);
+
+    // 查询并输出
+    cout << getLCA(x, y) << endl;
+
+    return 0;
+}
+```
