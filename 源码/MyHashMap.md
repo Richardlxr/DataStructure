@@ -44,4 +44,37 @@ class MyHashMap {
         return -1;
     }
 };
+
+void remove(int key) {
+    // 1. 计算哈希索引
+    int index = (key % buckets.size() + buckets.size()) % buckets.size();
+
+    Node * curr = buckets[index];
+    Node * prev = nullptr; // 用于记录当前节点的前一个节点
+
+    // 2. 遍历链表寻找对应的 key
+    while (curr != nullptr) {
+        if (curr - > key == key) {
+            // 找到了要删除的节点
+            if (prev == nullptr) {
+                // 情况 A：要删除的节点正好是链表的第一个节点（头节点）
+                // 直接让桶里的指针指向下一个节点
+                buckets[index] = curr - > next;
+            } else {
+                // 情况 B：要删除的节点在链表的中间或尾部
+                // 跳过当前节点，将前后连接起来
+                prev - > next = curr - > next;
+            }
+
+            // 3. 释放内存
+            delete curr;
+            return; // 删除成功，直接返回
+        }
+        // 指针往下走
+        prev = curr;
+        curr = curr - > next;
+    }
+
+    // 如果循环结束还没找到，说明 key 不存在，不需要做任何事
+}
 ```
