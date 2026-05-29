@@ -503,7 +503,7 @@ struct LeafNode : public BPlusNode {
 
 **这就叫：数据（RowData）留在了底层链表，而它的键值（Key）作为一个整数，被复制上去当了路牌。**
 
-## ## 2. $n=5$ 的 B+树 分裂全流程硬核推演
+## 2. $n=5$ 的 B+树 分裂全流程硬核推演
 
 定好规矩，对于阶数 $n=5$ 的 B+树：
 
@@ -521,15 +521,12 @@ struct LeafNode : public BPlusNode {
 所有的插入必然先发生在 `LeafNode` 里。
 
 - **插入 10, 20, 30, 40**
-    
-    Plaintext
-    
+
     ```
     LeafNode: [ 10 | 20 | 30 | 40 ]
     (此时它们的 RowData 也老老实实跟在旁边)
     ```
     
-
 ### 💥 Step 1: 插入 50，叶子节点满载分裂
 
 叶子节点暂时变成 `[10 | 20 | 30 | 40 | 50]`，5 个满了！
@@ -549,7 +546,6 @@ struct LeafNode : public BPlusNode {
 
 **当前的物理结构：**
 
-Plaintext
 
 ```
            (InternalNode)
