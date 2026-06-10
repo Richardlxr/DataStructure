@@ -10,3 +10,6 @@
 # OS specific files
 .DS_Store
 Thumbs.db
+
+# Obsidian local plugin secrets
+.obsidian/plugins/copilot/data.json
